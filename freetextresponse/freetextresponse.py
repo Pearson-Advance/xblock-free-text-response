@@ -6,7 +6,7 @@ import os
 import logging
 import pkg_resources
 from enum import Enum
-from courseware.model_data import DjangoKeyValueStore, FieldDataCache
+from lms.djangoapps.courseware.model_data import DjangoKeyValueStore, FieldDataCache
 from django.db import IntegrityError
 from django.utils.translation import ungettext
 from django.utils.translation import ugettext_lazy as _
@@ -269,7 +269,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         Assemble the HTML, JS, and CSS for an XBlock fragment
         """
         xblockId = self._get_xblock_id()
-        fragment = Fragment(unicode(html_source, 'utf-8'))
+        fragment = Fragment(html_source.replace("b\'", '').replace('\\n', '').replace("\'", ''))
         for url in urls_css:
             fragment.add_css_url(url)
         for path in paths_css:
@@ -307,7 +307,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         """
         path = os.path.join('templates', path)
         resource_string = pkg_resources.resource_string(__name__, path)
-        return resource_string
+        return str(resource_string)
 
     def student_item_key(self, user=None):
         """ Get the student_item_dict required for the submissions API """
@@ -317,8 +317,8 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
             student_item = dict(
                 student_id=user.id,
-                course_id=unicode(location.course_key),
-                item_id=unicode(location),
+                course_id=str(location.course_key),
+                item_id=str(location),
                 item_type=self.scope_ids.block_type,
             )
         except AttributeError:
