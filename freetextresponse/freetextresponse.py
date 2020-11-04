@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This is the core logic for the Free-text Response XBlock
 """
@@ -269,7 +268,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         Assemble the HTML, JS, and CSS for an XBlock fragment
         """
         xblockId = self._get_xblock_id()
-        fragment = Fragment(html_source.replace("b\'", '').replace('\\n', '').replace("\'", ''))
+        fragment = Fragment(html_source)
         for url in urls_css:
             fragment.add_css_url(url)
         for path in paths_css:
@@ -307,7 +306,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         """
         path = os.path.join('templates', path)
         resource_string = pkg_resources.resource_string(__name__, path)
-        return str(resource_string)
+        return resource_string.decode('utf-8')
 
     def student_item_key(self, user=None):
         """ Get the student_item_dict required for the submissions API """
@@ -374,10 +373,10 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         view_html = FreeTextResponse.get_resource_string('freetextresponse_view.html')
         view_html = view_html.format(
             self=self,
-            display_name=self.display_name.encode("utf-8"),
+            display_name=self.display_name,
             xblock_id=xblock_id,
-            prompt=self.prompt.encode("utf-8"),
-            student_answer=self.student_answer.encode("utf-8"),
+            prompt=self.prompt,
+            student_answer=self.student_answer,
             word_count_message=self._get_word_count_message(),
             indicator_class=self._get_indicator_class(),
             problem_progress=self._get_problem_progress(),
@@ -519,7 +518,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
                 min=self.min_word_count,
                 max=self.max_word_count,
             )
-        return result.encode("utf-8")
+        return result
 
     def _get_invalid_word_count_message(self, ignore_attempts=False):
         """
